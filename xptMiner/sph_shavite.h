@@ -308,8 +308,7 @@ void sph_shavite512_addbits_and_close(
 	void *cc, unsigned ub, unsigned n, void *dst);
 	
 // optimized routines
-
-void shavite_big_core_opt(long long * msg, long long * dataOut);
+void shavite_big_core_opt(unsigned long long * amsg, unsigned long long * adataOut);
 
 #ifdef __cplusplus
 }

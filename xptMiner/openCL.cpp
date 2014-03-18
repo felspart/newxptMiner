@@ -1,5 +1,9 @@
 #include"global.h"
-
+#ifdef __linux__
+#include <stdio.h>
+#include <stdlib.h>
+#include <dlfcn.h>
+#endif 
 
 CL_API_ENTRY cl_int (CL_API_CALL *clGetDeviceIDs)(cl_platform_id, cl_device_type, cl_uint, cl_device_id*, cl_uint*);
 
@@ -182,6 +186,17 @@ void openCL_init()
 	openCLInited = true;
 #ifdef _WIN32
 	HMODULE openCLModule = LoadLibraryA("opencl.dll");
+#else
+	void *openCLModule;
+	double (*cosine)(double);
+	char *error;
+	   openCLModule = dlopen("libOpenCL.so", RTLD_LAZY);
+    if (!openCLModule) {
+        fprintf(stderr, "%s\n", dlerror());
+        exit(EXIT_FAILURE);
+    }
+	//*(void **) (&cosine) = dlsym(openCLModule, "cos");
+#define GetProcAddress(Handle, Name) dlsym(Handle, Name)
 #endif
 	if( openCLModule == NULL )
 	{

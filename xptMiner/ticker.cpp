@@ -54,7 +54,7 @@ uint64_t getTimerRes(void) {
   LARGE_INTEGER hpcFreq;
   QueryPerformanceFrequency(&hpcFreq);
   resolution =  (uint64_t)hpcFreq.QuadPart;
-#elif defined(__unix__)
+#elif defined(__unix__) 
   struct timespec t_res;
   clock_getres(CLOCK_MONOTONIC, &t_res);
   resolution = t_res.tv_nsec + t_res.tv_sec * 1000000000;

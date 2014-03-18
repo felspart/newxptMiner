@@ -6,31 +6,43 @@
       <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
     <Filter Include="Source Files\jhlib">
-      <UniqueIdentifier>{8234dd40-574b-4521-9ae6-b3012fe3b2e5}</UniqueIdentifier>
+      <UniqueIdentifier>{fed948de-409c-4218-8c97-f7dcae981179}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\algorithm">
-      <UniqueIdentifier>{a9cbc9c8-8aeb-441d-aa2c-a7c6bb7f3fa5}</UniqueIdentifier>
+      <UniqueIdentifier>{bcf2ab62-7d88-4cbf-bf89-f62bd69b1baa}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\algorithm\protoshares">
-      <UniqueIdentifier>{b1c2e1b1-658c-44c9-8773-c8375c28cef2}</UniqueIdentifier>
+      <UniqueIdentifier>{e67a63ec-6ab1-443a-aa6a-3434dc735020}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\algorithm\scrypt">
-      <UniqueIdentifier>{1d4a91df-1a2d-4608-bce3-ad75ac892ebe}</UniqueIdentifier>
+      <UniqueIdentifier>{074a9094-649f-4e48-a022-1f1eba59203c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\algorithm\primecoin">
-      <UniqueIdentifier>{a38ac5e2-8c53-4935-a2ef-49a66f0aaa4d}</UniqueIdentifier>
+      <UniqueIdentifier>{18fff695-f809-4bda-941f-1a6d07e74c16}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\algorithm\metiscoin">
-      <UniqueIdentifier>{ec4d928c-2c94-4e64-965b-c05e5ea1c08f}</UniqueIdentifier>
+      <UniqueIdentifier>{c1b1c2bf-a2d9-4dde-8f5d-14bcdb73bab6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\algorithm\maxcoin">
+      <UniqueIdentifier>{7e3b6ff0-301c-48ce-963b-efe3e06120da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\algorithm\riecoin">
+      <UniqueIdentifier>{1036bcb8-b683-490d-aea6-3528b338d990}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\crypto">
-      <UniqueIdentifier>{857c48bb-3f24-468d-b5e0-ff1e3cae879b}</UniqueIdentifier>
+      <UniqueIdentifier>{3e1c014d-4e47-4c22-a9ce-b1b30aae1ef1}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\util">
-      <UniqueIdentifier>{69bc64ba-b22c-4c62-8289-4835cd94a6c0}</UniqueIdentifier>
+      <UniqueIdentifier>{5255f3d1-5561-4f24-aa1f-6b642ee25ba2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files\xpt">
-      <UniqueIdentifier>{7e6ec1e6-907a-4f6a-9784-8badc0e799ff}</UniqueIdentifier>
+      <UniqueIdentifier>{61b06210-f620-4427-a065-f29b6dd6b4cd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\opencl">
+      <UniqueIdentifier>{e94869c1-82ed-464b-946b-8156674084a4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\opencl\include">
+      <UniqueIdentifier>{90e2dab9-abe6-43ce-b18f-440e08aed90d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Header Files">
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
@@ -81,8 +93,41 @@
     <ClInclude Include="xptServer.h">
       <Filter>Source Files\xpt</Filter>
     </ClInclude>
-    <ClInclude Include="ticker.h">
-      <Filter>Source Files\util</Filter>
+    <ClInclude Include="openCL.h">
+      <Filter>Source Files\opencl</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenCL\CL\cl.h">
+      <Filter>Source Files\opencl\include</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenCL\CL\cl.hpp">
+      <Filter>Source Files\opencl\include</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenCL\CL\cl_d3d10.h">
+      <Filter>Source Files\opencl\include</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenCL\CL\cl_d3d11.h">
+      <Filter>Source Files\opencl\include</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenCL\CL\cl_dx9_media_sharing.h">
+      <Filter>Source Files\opencl\include</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenCL\CL\cl_egl.h">
+      <Filter>Source Files\opencl\include</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenCL\CL\cl_ext.h">
+      <Filter>Source Files\opencl\include</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenCL\CL\cl_gl.h">
+      <Filter>Source Files\opencl\include</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenCL\CL\cl_gl_ext.h">
+      <Filter>Source Files\opencl\include</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenCL\CL\cl_platform.h">
+      <Filter>Source Files\opencl\include</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenCL\CL\opencl.h">
+      <Filter>Source Files\opencl\include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -106,6 +151,12 @@
     </ClCompile>
     <ClCompile Include="metiscoinMiner.cpp">
       <Filter>Source Files\algorithm\metiscoin</Filter>
+    </ClCompile>
+    <ClCompile Include="maxcoinMiner.cpp">
+      <Filter>Source Files\algorithm\maxcoin</Filter>
+    </ClCompile>
+    <ClCompile Include="riecoinMiner.cpp">
+      <Filter>Source Files\algorithm\riecoin</Filter>
     </ClCompile>
     <ClCompile Include="keccak.c">
       <Filter>Source Files\crypto</Filter>
@@ -136,6 +187,9 @@
     </ClCompile>
     <ClCompile Include="xptServerPacketHandler.cpp">
       <Filter>Source Files\xpt</Filter>
+    </ClCompile>
+    <ClCompile Include="openCL.cpp">
+      <Filter>Source Files\opencl</Filter>
     </ClCompile>
     <ClCompile Include="ticker.cpp">
       <Filter>Source Files\util</Filter>

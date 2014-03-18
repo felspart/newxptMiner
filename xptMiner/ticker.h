@@ -4,13 +4,15 @@
 #if (defined(__MACH__) && defined(__APPLE__))
 #include <mach/mach_time.h>
 #else
+#ifndef __MINGW32__
 #include <time.h>
+#endif
 #endif
 
 #ifdef _WIN32
 #include<windows.h>
 typedef unsigned __int64 uint64_t;
-#else 
+#else
 #include <stdint.h>
 #include <errno.h>
 #endif

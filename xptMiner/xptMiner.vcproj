@@ -43,6 +43,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="openCL/"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -60,6 +61,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="mpir\x86\mpir.lib"
 				GenerateDebugInformation="true"
 				TargetMachine="1"
 			/>
@@ -111,6 +113,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="openCL/"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -128,6 +131,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="mpir\x64\mpir.lib"
 				GenerateDebugInformation="true"
 				TargetMachine="17"
 			/>
@@ -181,6 +185,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="openCL/"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				WarningLevel="3"
@@ -197,6 +202,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="mpir\x86\mpir.lib"
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -253,6 +259,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
+				AdditionalIncludeDirectories="openCL/"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				WarningLevel="3"
@@ -269,6 +276,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="mpir\x64\mpir.lib"
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -372,6 +380,22 @@
 						>
 					</File>
 				</Filter>
+				<Filter
+					Name="maxcoin"
+					>
+					<File
+						RelativePath=".\maxcoinMiner.cpp"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="riecoin"
+					>
+					<File
+						RelativePath=".\riecoinMiner.cpp"
+						>
+					</File>
+				</Filter>
 			</Filter>
 			<Filter
 				Name="crypto"
@@ -460,6 +484,66 @@
 					RelativePath=".\xptServerPacketHandler.cpp"
 					>
 				</File>
+			</Filter>
+			<Filter
+				Name="opencl"
+				>
+				<File
+					RelativePath=".\openCL.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\openCL.h"
+					>
+				</File>
+				<Filter
+					Name="include"
+					>
+					<File
+						RelativePath=".\OpenCL\CL\cl.h"
+						>
+					</File>
+					<File
+						RelativePath=".\OpenCL\CL\cl.hpp"
+						>
+					</File>
+					<File
+						RelativePath=".\OpenCL\CL\cl_d3d10.h"
+						>
+					</File>
+					<File
+						RelativePath=".\OpenCL\CL\cl_d3d11.h"
+						>
+					</File>
+					<File
+						RelativePath=".\OpenCL\CL\cl_dx9_media_sharing.h"
+						>
+					</File>
+					<File
+						RelativePath=".\OpenCL\CL\cl_egl.h"
+						>
+					</File>
+					<File
+						RelativePath=".\OpenCL\CL\cl_ext.h"
+						>
+					</File>
+					<File
+						RelativePath=".\OpenCL\CL\cl_gl.h"
+						>
+					</File>
+					<File
+						RelativePath=".\OpenCL\CL\cl_gl_ext.h"
+						>
+					</File>
+					<File
+						RelativePath=".\OpenCL\CL\cl_platform.h"
+						>
+					</File>
+					<File
+						RelativePath=".\OpenCL\CL\opencl.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter

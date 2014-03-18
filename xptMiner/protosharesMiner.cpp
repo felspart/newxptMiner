@@ -4,12 +4,7 @@
 #define SEARCH_SPACE_BITS		50
 #define BIRTHDAYS_PER_HASH		8
 
-
-#ifdef _WIN32
-__declspec(thread) uint32* __collisionMap = NULL;
-#else
-  uint32* __collisionMap = NULL;
-#endif
+thread_local uint32* __collisionMap = NULL;
 
 bool protoshares_revalidateCollision(minerProtosharesBlock_t* block, uint8* midHash, uint32 indexA, uint32 indexB)
 {

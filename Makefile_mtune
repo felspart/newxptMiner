@@ -60,7 +60,8 @@ OBJS = \
 	xptMiner/transaction.o \
 	xptMiner/maxcoinMiner.o \
 	xptMiner/riecoinMiner.o \
-	xptMiner/metiscoinMiner.o 
+	xptMiner/metiscoinMiner.o \
+        xptMiner/win.o
 #	xptMiner/maxcoinMinerCL.o \
 #	xptMiner/OpenCLObjects.o \
 #	xptMiner/openCL.o \

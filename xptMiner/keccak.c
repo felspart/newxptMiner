@@ -83,7 +83,7 @@ extern "C"{
  * -- copy the state, except on x86
  * -- unroll 8 rounds on "big" machine, 2 rounds on "small" machines
  */
-	
+
 #if SPH_SMALL_FOOTPRINT && !defined SPH_SMALL_FOOTPRINT_KECCAK
 #define SPH_SMALL_FOOTPRINT_KECCAK   1
 #endif
@@ -92,7 +92,7 @@ extern "C"{
  * By default, we select the 64-bit implementation if a 64-bit type
  * is available, unless a 32-bit x86 is detected.
  */
-//#if !defined SPH_KECCAK_64 && SPH_64 
+//#if !defined SPH_KECCAK_64 && SPH_64 \
 //	&& !(defined __i386__ || SPH_I386_GCC || SPH_I386_MSVC)
 //#define SPH_KECCAK_64   1
 //#endif
@@ -976,8 +976,7 @@ static const struct {
 
 #define THETA(b00, b01, b02, b03, b04, b10, b11, b12, b13, b14, \
 	b20, b21, b22, b23, b24, b30, b31, b32, b33, b34, \
-	b40, b41, b42, b43, b44) \
-	do { \
+	b40, b41, b42, b43, b44) do { \
 		DECL64(t0); \
 		DECL64(t1); \
 		DECL64(t2); \
@@ -1014,6 +1013,7 @@ static const struct {
 		XOR64(b43, b43, t4); \
 		XOR64(b44, b44, t4); \
 	} while (0)
+	
 
 #define RHO(b00, b01, b02, b03, b04, b10, b11, b12, b13, b14, \
 	b20, b21, b22, b23, b24, b30, b31, b32, b33, b34, \
@@ -1391,12 +1391,12 @@ static const struct {
 #define LPAR   (
 #define RPAR   )
 
-#define KF_ELT(r, s, k)   do { \
+#define KF_ELT(r, s, k)    \
 		THETA LPAR P ## r RPAR; \
 		RHO LPAR P ## r RPAR; \
 		KHI LPAR P ## s RPAR; \
-		IOTA(k); \
-	} while (0)
+		IOTA(k); 
+	
 
 #define DO(x)   x
 
@@ -1657,8 +1657,7 @@ void keccak_core_prepare(sph_keccak512_context *kc, const void *data, unsigned l
 	a11 ^= sph_dec64le_aligned(dataU8 +  48);
 	a21 ^= sph_dec64le_aligned(dataU8 +  56);
 	a31 ^= sph_dec64le_aligned(dataU8 +  64); 
-
-	KECCAK_F_1600;
+	 KECCAK_F_1600;
 	// moved from keccak_core_opt() second pass to here
 	a10 ^= 0x1;
 	a31 ^= 0x8000000000000000ULL;
@@ -1790,6 +1789,27 @@ void keccak_core_opt(sph_keccak512_context *kc, unsigned long long* keccakPre, u
 	unsigned long long t;
 
 	buf = kc->buf;
+	
+	//w1 &= ~0xFFFFFFFFULL;
+
+	//if( (w1>>32) == 0 )
+	//{
+	//	unsigned char* emptyData = (unsigned char*)malloc(sizeof(unsigned char)*25);
+	//	keccakPre = (unsigned long long*)emptyData;
+	//	memset(keccakPre, 0x00, sizeof(unsigned long long)*25);
+	//}
+	//else if( (w1>>32) == 1 )
+	//{
+	//	//memset(keccakPre, 0x00, sizeof(unsigned long long)*25);
+	//	w1 &= 0xFFFFFFFFULL;
+	//}
+	//else if( (w1>>32) == 2 )
+	//{
+	//	//memset(keccakPre, 0x00, sizeof(unsigned long long)*25);
+	//	w1 &= 0xFFFFFFFFULL;
+	//	w1 |= 0x100000000ULL;
+	//}
+
 	//READ_STATE(kc);
 	a00 = keccakPre[ 0]; 
 	a10 = keccakPre[ 1]; 
@@ -1820,8 +1840,128 @@ void keccak_core_opt(sph_keccak512_context *kc, unsigned long long* keccakPre, u
 	//memcpy(buf, (const unsigned char *)data+72, 72);
 	a00 ^= w1;//sph_dec64le_aligned(dataU8 +   0);
 
-	KECCAK_F_1600;
-	WRITE_STATE(kc);
+	//KECCAK_F_1600;
+	for (j = 0; j < 24; j += 4)
+	{
+//		KF_ELT( 0,  1, RC[j + 0]);
+//		KF_ELT( 1,  2, RC[j + 1]);
+//		KF_ELT( 2,  3, RC[j + 2]);
+//		KF_ELT( 3,  4, RC[j + 3]);
+//		
+//		sKF_ELT(r, s, k)    
+//		KF_ELT( 0,  1, RC[j + 0]);
+		THETA ( a00, a01, a02, a03, a04, a10, a11, a12, a13, a14, a20, a21, \
+              a22, a23, a24, a30, a31, a32, a33, a34, a40, a41, a42, a43, a44 ); 
+		RHO   ( a00, a01, a02, a03, a04, a10, a11, a12, a13, a14, a20, a21, \
+              a22, a23, a24, a30, a31, a32, a33, a34, a40, a41, a42, a43, a44 ); 
+		KHI   ( a00, a30, a10, a40, a20, a11, a41, a21, a01, a31, a22, a02, \
+              a32, a12, a42, a33, a13, a43, a23, a03, a44, a24, a04, a34, a14 ); 
+		IOTA(RC[j + 0]);
+		
+//		KF_ELT( 1,  2, RC[j + 1]);
+		THETA ( a00, a30, a10, a40, a20, a11, a41, a21, a01, a31, a22, a02, \
+              a32, a12, a42, a33, a13, a43, a23, a03, a44, a24, a04, a34, a14 ); 
+		RHO   ( a00, a30, a10, a40, a20, a11, a41, a21, a01, a31, a22, a02, \
+              a32, a12, a42, a33, a13, a43, a23, a03, a44, a24, a04, a34, a14 ); 
+		KHI   ( a00, a33, a11, a44, a22, a41, a24, a02, a30, a13, a32, a10, \
+              a43, a21, a04, a23, a01, a34, a12, a40, a14, a42, a20, a03, a31 );
+		IOTA(RC[j + 1]);
+		
+//		KF_ELT( 2,  3, RC[j + 2]);
+		THETA ( a00, a33, a11, a44, a22, a41, a24, a02, a30, a13, a32, a10, \
+              a43, a21, a04, a23, a01, a34, a12, a40, a14, a42, a20, a03, a31 ); 
+		RHO   ( a00, a33, a11, a44, a22, a41, a24, a02, a30, a13, a32, a10, \
+              a43, a21, a04, a23, a01, a34, a12, a40, a14, a42, a20, a03, a31 ); 
+		KHI   ( a00, a23, a41, a14, a32, a24, a42, a10, a33, a01, a43, a11, \
+              a34, a02, a20, a12, a30, a03, a21, a44, a31, a04, a22, a40, a13 );
+		IOTA(RC[j + 2]);
+		
+//		KF_ELT( 3,  4, RC[j + 3]);	
+		THETA ( a00, a23, a41, a14, a32, a24, a42, a10, a33, a01, a43, a11, \
+              a34, a02, a20, a12, a30, a03, a21, a44, a31, a04, a22, a40, a13 ); 
+		RHO   ( a00, a23, a41, a14, a32, a24, a42, a10, a33, a01, a43, a11, \
+              a34, a02, a20, a12, a30, a03, a21, a44, a31, a04, a22, a40, a13 ); 
+		KHI   ( a00, a12, a24, a31, a43, a42, a04, a11, a23, a30, a34, a41, \
+              a03, a10, a22, a21, a33, a40, a02, a14, a13, a20, a32, a44, a01 );
+		IOTA(RC[j + 3]);
+//#define KF_ELT(r, s, k)   do { \
+//	THETA LPAR P ## r RPAR; \
+//	RHO LPAR P ## r RPAR; \
+//	KHI LPAR P ## s RPAR; \
+//	IOTA(k); \
+//		} while (0)
+		//THETA LPAR P ## r RPAR;
+		//RHO LPAR P ## r RPAR;
+		//KHI LPAR P ## s RPAR;
+		//IOTA(k);
+		//
+		// P4_TO_P0;
+		//DECL64(t);
+		MOV64(t, a01);
+		MOV64(a01, a12);
+		MOV64(a12, a11);
+		MOV64(a11, a04);
+		MOV64(a04, a43);
+		MOV64(a43, a44);
+		MOV64(a44, t);
+		MOV64(t, a02);
+		MOV64(a02, a24);
+		MOV64(a24, a22);
+		MOV64(a22, a03);
+		MOV64(a03, a31);
+		MOV64(a31, a33);
+		MOV64(a33, t);
+		MOV64(t, a10);
+		MOV64(a10, a42);
+		MOV64(a42, a32);
+		MOV64(a32, a40);
+		MOV64(a40, a13);
+		MOV64(a13, a23);
+		MOV64(a23, t);
+		MOV64(t, a14);
+		MOV64(a14, a30);
+		MOV64(a30, a21);
+		MOV64(a21, a41);
+		MOV64(a41, a20);
+		MOV64(a20, a34);
+		MOV64(a34, t);
+	}
+	
+	// WRITE_STATE(kc);
+	//unsigned long long *dstU64 = (unsigned long long*)dst;
+	dst[0] = a00;
+	dst[1] = ~a10;
+	dst[2] = ~a20;
+	dst[3] = a30;
+	dst[4] = a40;
+	dst[5] = a01;
+	dst[6] = a11;
+	dst[7] = a21;
+	/*(state)->u.wide[ 0] = a00;
+	(state)->u.wide[ 1] = a10;
+	(state)->u.wide[ 2] = a20;
+	(state)->u.wide[ 3] = a30;
+	(state)->u.wide[ 4] = a40;
+	(state)->u.wide[ 5] = a01;
+	(state)->u.wide[ 6] = a11;
+	(state)->u.wide[ 7] = a21;
+	(state)->u.wide[ 8] = a31;
+	(state)->u.wide[ 9] = a41;
+	(state)->u.wide[10] = a02;
+	(state)->u.wide[11] = a12;
+	(state)->u.wide[12] = a22;
+	(state)->u.wide[13] = a32;
+	(state)->u.wide[14] = a42;
+	(state)->u.wide[15] = a03;
+	(state)->u.wide[16] = a13;
+	(state)->u.wide[17] = a23;
+	(state)->u.wide[18] = a33;
+	(state)->u.wide[19] = a43;
+	(state)->u.wide[20] = a04;
+	(state)->u.wide[21] = a14;
+	(state)->u.wide[22] = a24;
+	(state)->u.wide[23] = a34;
+	(state)->u.wide[24] = a44;*/
 	/* Finalize the "lane complement" */ 
 	//kc->u.wide[ 1] = ~kc->u.wide[ 1]; 
 	//kc->u.wide[ 2] = ~kc->u.wide[ 2]; 
@@ -2306,10 +2446,36 @@ sph_keccak512_addbits_and_close(void *cc, unsigned ub, unsigned n, void *dst)
 //	*(dst+3) = a30;
 //}
 
+#undef a00
+#undef a10
+#undef a20
+#undef a30
+#undef a40
+#undef a01
+#undef a11
+#undef a21
+#undef a31
+#undef a41
+#undef a02
+#undef a12
+#undef a22
+#undef a32
+#undef a42
+#undef a03
+#undef a13
+#undef a23
+#undef a33
+#undef a43
+#undef a04
+#undef a14
+#undef a24
+#undef a34
+#undef a44
+
 unsigned long long keccak256_maxcoin_opt_v(const unsigned long long *data)
 {
 	int j;
-	sph_u64 t;
+	unsigned long long t;
 	DECL64(c0);
 	DECL64(c1);
 	DECL64(c2);
@@ -2319,187 +2485,187 @@ unsigned long long keccak256_maxcoin_opt_v(const unsigned long long *data)
 	DECL64(tt1);
 	DECL64(tt2);
 	DECL64(tt3);
-	sph_u64 ca00, ca01, ca02, ca03, ca04;
-	sph_u64 ca10, ca11, ca12, ca13, ca14;
-	sph_u64 ca20, ca21, ca22, ca23, ca24;
-	sph_u64 ca30, ca31, ca32, ca33, ca34;
-	sph_u64 ca40, ca41, ca42, ca43, ca44;
-	ca00 = data[0];
-	ca10 = ~data[1];
-	ca20 = ~data[2];
-	ca30 = data[3];
-	ca40 = data[4];
-	ca01 = data[5];
-	ca11 = data[6];
-	ca21 = data[7];
-	ca31 = ~data[8];
-	ca41 = data[9];
-	ca02 = 1;
+	unsigned long long a00, a01, a02, a03, a04;
+	unsigned long long a10, a11, a12, a13, a14;
+	unsigned long long a20, a21, a22, a23, a24;
+	unsigned long long a30, a31, a32, a33, a34;
+	unsigned long long a40, a41, a42, a43, a44;
+	a00 = data[0];
+	a10 = ~data[1];
+	a20 = ~data[2];
+	a30 = data[3];
+	a40 = data[4];
+	a01 = data[5];
+	a11 = data[6];
+	a21 = data[7];
+	a31 = ~data[8];
+	a41 = data[9];
+	a02 = 1;
 
-	ca12 = 0;
-	ca22 = 0xFFFFFFFFFFFFFFFF;
-	ca32 = 0;
-	ca42 = 0;
-	ca03 = 0;
-	ca13 = 0x8000000000000000ULL;
-	ca23 = 0xFFFFFFFFFFFFFFFF;
-	ca33 = 0;
-	ca43 = 0; 
-	ca04 = 0xFFFFFFFFFFFFFFFF; 
-	ca14 = 0;
-	ca24 = 0;
-	ca34 = 0;
-	ca44 = 0;
+	a12 = 0;
+	a22 = 0xFFFFFFFFFFFFFFFF;
+	a32 = 0;
+	a42 = 0;
+	a03 = 0;
+	a13 = 0x8000000000000000ULL;
+	a23 = 0xFFFFFFFFFFFFFFFF;
+	a33 = 0;
+	a43 = 0; 
+	a04 = 0xFFFFFFFFFFFFFFFF; 
+	a14 = 0;
+	a24 = 0;
+	a34 = 0;
+	a44 = 0;
 
 	for (j = 0; j < 24-1; j++) 
 	{
-		TH_ELT_O(c0, ca40, ca41, ca42, ca43, ca44, ca10, ca11, ca12, ca13, ca14);
-		TH_ELT_O(c1, ca00, ca01, ca02, ca03, ca04, ca20, ca21, ca22, ca23, ca24);
-		TH_ELT_O(c2, ca10, ca11, ca12, ca13, ca14, ca30, ca31, ca32, ca33, ca34);
-		TH_ELT_O(c3, ca20, ca21, ca22, ca23, ca24, ca40, ca41, ca42, ca43, ca44);
-		TH_ELT_O(c4, ca30, ca31, ca32, ca33, ca34, ca00, ca01, ca02, ca03, ca04);
-		ca00 = ca00 ^ c0;
-		ca01 = ca01 ^ c0;
-		ca02 = ca02 ^ c0;
-		ca03 = ca03 ^ c0;
-		ca04 = ca04 ^ c0;
-		ca10 = ca10 ^ c1;
-		ca11 = ca11 ^ c1;
-		ca12 = ca12 ^ c1;
-		ca13 = ca13 ^ c1;
-		ca14 = ca14 ^ c1;
-		ca20 = ca20 ^ c2;
-		ca21 = ca21 ^ c2;
-		ca22 = ca22 ^ c2;
-		ca23 = ca23 ^ c2;
-		ca24 = ca24 ^ c2;
-		ca30 = ca30 ^ c3;
-		ca31 = ca31 ^ c3;
-		ca32 = ca32 ^ c3;
-		ca33 = ca33 ^ c3;
-		ca34 = ca34 ^ c3;
-		ca40 = ca40 ^ c4;
-		ca41 = ca41 ^ c4;
-		ca42 = ca42 ^ c4;
-		ca43 = ca43 ^ c4;
-		ca44 = ca44 ^ c4;
+		TH_ELT_O(c0, a40, a41, a42, a43, a44, a10, a11, a12, a13, a14);
+		TH_ELT_O(c1, a00, a01, a02, a03, a04, a20, a21, a22, a23, a24);
+		TH_ELT_O(c2, a10, a11, a12, a13, a14, a30, a31, a32, a33, a34);
+		TH_ELT_O(c3, a20, a21, a22, a23, a24, a40, a41, a42, a43, a44);
+		TH_ELT_O(c4, a30, a31, a32, a33, a34, a00, a01, a02, a03, a04);
+		a00 = a00 ^ c0;
+		a01 = a01 ^ c0;
+		a02 = a02 ^ c0;
+		a03 = a03 ^ c0;
+		a04 = a04 ^ c0;
+		a10 = a10 ^ c1;
+		a11 = a11 ^ c1;
+		a12 = a12 ^ c1;
+		a13 = a13 ^ c1;
+		a14 = a14 ^ c1;
+		a20 = a20 ^ c2;
+		a21 = a21 ^ c2;
+		a22 = a22 ^ c2;
+		a23 = a23 ^ c2;
+		a24 = a24 ^ c2;
+		a30 = a30 ^ c3;
+		a31 = a31 ^ c3;
+		a32 = a32 ^ c3;
+		a33 = a33 ^ c3;
+		a34 = a34 ^ c3;
+		a40 = a40 ^ c4;
+		a41 = a41 ^ c4;
+		a42 = a42 ^ c4;
+		a43 = a43 ^ c4;
+		a44 = a44 ^ c4;
 		/* ROL64(b00, b00,  0); */
-		ROL64(ca01, ca01, 36);
-		ROL64(ca02, ca02,  3);
-		ROL64(ca03, ca03, 41);
-		ROL64(ca04, ca04, 18);
-		ROL64(ca10, ca10,  1);
-		ROL64(ca11, ca11, 44);
-		ROL64(ca12, ca12, 10);
-		ROL64(ca13, ca13, 45);
-		ROL64(ca14, ca14,  2);
-		ROL64(ca20, ca20, 62);
-		ROL64(ca21, ca21,  6);
-		ROL64(ca22, ca22, 43);
-		ROL64(ca23, ca23, 15);
-		ROL64(ca24, ca24, 61);
-		ROL64(ca30, ca30, 28);
-		ROL64(ca31, ca31, 55);
-		ROL64(ca32, ca32, 25);
-		ROL64(ca33, ca33, 21);
-		ROL64(ca34, ca34, 56);
-		ROL64(ca40, ca40, 27);
-		ROL64(ca41, ca41, 20);
-		ROL64(ca42, ca42, 39);
-		ROL64(ca43, ca43,  8);
-		ROL64(ca44, ca44, 14);
-		t = ~ca22;
-		c0 = ca00 ^ (ca11|ca22);
-		c1 = ca11 ^ (t|ca33);
-		c2 = ca22 ^ (ca33&ca44);
-		c3 = ca33 ^ (ca44|ca00);
-		c4 = ca44 ^ (ca00&ca11);
-		ca00 = c0;
-		ca11 = c1;
-		ca22 = c2;
-		ca33 = c3;
-		ca44 = c4;
-		t = ~ca24;
-		c0 = ca30 ^ (ca41|ca02);
-		c1 = ca41 ^ (ca02&ca13);
-		c2 = ca02 ^ (ca13|t);
-		c3 = ca13 ^ (ca24|ca30);
-		c4 = ca24 ^ (ca30&ca41);
-		ca30 = c0;
-		ca41 = c1;
-		ca02 = c2;
-		ca13 = c3;
-		ca24 = c4;
-		t = ~ca43;
-		c0 = ca10 ^ (ca21|ca32);
-		c1 = ca21 ^ (ca32&ca43);
-		c2 = ca32 ^ (t&ca04);
-		c3 = t ^ (ca04|ca10);
-		c4 = ca04 ^ (ca10&ca21);
-		ca10 = c0;
-		ca21 = c1;
-		ca32 = c2;
-		ca43 = c3;
-		ca04 = c4;
-		t = ~ca23;
-		c0 = ca40 ^ (ca01&ca12);
-		c1 = ca01 ^ (ca12|ca23);
-		c2 = ca12 ^ (t|ca34);
-		c3 = t ^ (ca34&ca40);
-		c4 = ca34 ^ (ca40|ca01);
-		ca40 = c0;
-		ca01 = c1;
-		ca12 = c2;
-		ca23 = c3;
-		ca34 = c4;
-		t = ~ca31;
-		c0 = ca20 ^ (t&ca42);
-		c1 = t ^ (ca42|ca03);
-		c2 = ca42 ^ (ca03&ca14);
-		c3 = ca03 ^ (ca14|ca20);
-		c4 = ca14 ^ (ca20&ca31);
-		ca20 = c0;
-		ca31 = c1;
-		ca42 = c2;
-		ca03 = c3;
-		ca14 = c4;
-		ca00 ^= RC[j];
-		t = ca01;
-		ca01 = ca30;
-		ca30 = ca33;
-		ca33 = ca23;
-		ca23 = ca12;
-		ca12 = ca21;
-		ca21 = ca02;
-		ca02 = ca10;
-		ca10 = ca11;
-		ca11 = ca41;
-		ca41 = ca24;
-		ca24 = ca42;
-		ca42 = ca04;
-		ca04 = ca20;
-		ca20 = ca22;
-		ca22 = ca32;
-		ca32 = ca43;
-		ca43 = ca34;
-		ca34 = ca03;
-		ca03 = ca40;
-		ca40 = ca44;
-		ca44 = ca14;
-		ca14 = ca31;
-		ca31 = ca13;
-		ca13 = t;
+		ROL64(a01, a01, 36);
+		ROL64(a02, a02,  3);
+		ROL64(a03, a03, 41);
+		ROL64(a04, a04, 18);
+		ROL64(a10, a10,  1);
+		ROL64(a11, a11, 44);
+		ROL64(a12, a12, 10);
+		ROL64(a13, a13, 45);
+		ROL64(a14, a14,  2);
+		ROL64(a20, a20, 62);
+		ROL64(a21, a21,  6);
+		ROL64(a22, a22, 43);
+		ROL64(a23, a23, 15);
+		ROL64(a24, a24, 61);
+		ROL64(a30, a30, 28);
+		ROL64(a31, a31, 55);
+		ROL64(a32, a32, 25);
+		ROL64(a33, a33, 21);
+		ROL64(a34, a34, 56);
+		ROL64(a40, a40, 27);
+		ROL64(a41, a41, 20);
+		ROL64(a42, a42, 39);
+		ROL64(a43, a43,  8);
+		ROL64(a44, a44, 14);
+		t = ~a22;
+		c0 = a00 ^ (a11|a22);
+		c1 = a11 ^ (t|a33);
+		c2 = a22 ^ (a33&a44);
+		c3 = a33 ^ (a44|a00);
+		c4 = a44 ^ (a00&a11);
+		a00 = c0;
+		a11 = c1;
+		a22 = c2;
+		a33 = c3;
+		a44 = c4;
+		t = ~a24;
+		c0 = a30 ^ (a41|a02);
+		c1 = a41 ^ (a02&a13);
+		c2 = a02 ^ (a13|t);
+		c3 = a13 ^ (a24|a30);
+		c4 = a24 ^ (a30&a41);
+		a30 = c0;
+		a41 = c1;
+		a02 = c2;
+		a13 = c3;
+		a24 = c4;
+		t = ~a43;
+		c0 = a10 ^ (a21|a32);
+		c1 = a21 ^ (a32&a43);
+		c2 = a32 ^ (t&a04);
+		c3 = t ^ (a04|a10);
+		c4 = a04 ^ (a10&a21);
+		a10 = c0;
+		a21 = c1;
+		a32 = c2;
+		a43 = c3;
+		a04 = c4;
+		t = ~a23;
+		c0 = a40 ^ (a01&a12);
+		c1 = a01 ^ (a12|a23);
+		c2 = a12 ^ (t|a34);
+		c3 = t ^ (a34&a40);
+		c4 = a34 ^ (a40|a01);
+		a40 = c0;
+		a01 = c1;
+		a12 = c2;
+		a23 = c3;
+		a34 = c4;
+		t = ~a31;
+		c0 = a20 ^ (t&a42);
+		c1 = t ^ (a42|a03);
+		c2 = a42 ^ (a03&a14);
+		c3 = a03 ^ (a14|a20);
+		c4 = a14 ^ (a20&a31);
+		a20 = c0;
+		a31 = c1;
+		a42 = c2;
+		a03 = c3;
+		a14 = c4;
+		a00 ^= RC[j];
+		t = a01;
+		a01 = a30;
+		a30 = a33;
+		a33 = a23;
+		a23 = a12;
+		a12 = a21;
+		a21 = a02;
+		a02 = a10;
+		a10 = a11;
+		a11 = a41;
+		a41 = a24;
+		a24 = a42;
+		a42 = a04;
+		a04 = a20;
+		a20 = a22;
+		a22 = a32;
+		a32 = a43;
+		a43 = a34;
+		a34 = a03;
+		a03 = a40;
+		a40 = a44;
+		a44 = a14;
+		a14 = a31;
+		a31 = a13;
+		a13 = t;
 	}
 	// last round isolated
-	TH_ELT_O(c0, ca40, ca41, ca42, ca43, ca44, ca10, ca11, ca12, ca13, ca14);
-	TH_ELT_O(c3, ca20, ca21, ca22, ca23, ca24, ca40, ca41, ca42, ca43, ca44);
-	TH_ELT_O(c4, ca30, ca31, ca32, ca33, ca34, ca00, ca01, ca02, ca03, ca04);
-	ca00 = ca00 ^ c0;
-	ca33 = ca33 ^ c3;
-	ca44 = ca44 ^ c4;
-	ROL64(ca33, ca33, 21);
-	ROL64(ca44, ca44, 14);
-	return ca33 ^ (ca44|ca00);
+	TH_ELT_O(c0, a40, a41, a42, a43, a44, a10, a11, a12, a13, a14);
+	TH_ELT_O(c3, a20, a21, a22, a23, a24, a40, a41, a42, a43, a44);
+	TH_ELT_O(c4, a30, a31, a32, a33, a34, a00, a01, a02, a03, a04);
+	a00 = a00 ^ c0;
+	a33 = a33 ^ c3;
+	a44 = a44 ^ c4;
+	ROL64(a33, a33, 21);
+	ROL64(a44, a44, 14);
+	return a33 ^ (a44|a00);
 }
 
 #ifdef __cplusplus

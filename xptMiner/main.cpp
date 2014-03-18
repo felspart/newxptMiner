@@ -2,6 +2,8 @@
 #include "ticker.h"
 #include <signal.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <cstring>
 #define MAX_TRANSACTIONS	(4096)
 
@@ -260,10 +262,13 @@ void xptMiner_submitShare(minerRiecoinBlock_t* block, uint8* nOffset)
 
 #ifdef _WIN32
 int xptMiner_minerThread(int threadIndex)
+{
 #else
 void *xptMiner_minerThread(void *arg)
-#endif
 {
+	int threadIndex = (intptr_t)arg;
+#endif
+
 	// local work data
 	union
 	{
@@ -440,9 +445,13 @@ void *xptMiner_minerThread(void *arg)
 		}
 		else if( workDataSource.algorithm == ALGORITHM_MAXCOIN )
 		{
-//			if( minerSettings.useGPU && threadIndex == 0 )
-//				maxcoin_processGPU(&minerMaxcoinBlock);
-//			else
+#ifdef USE_OPENCL
+			if( minerSettings.useGPU && threadIndex == 0 )
+			{
+				maxcoin_processGPU(&minerMaxcoinBlock);
+			}
+			else
+#endif
 				maxcoin_process(&minerMaxcoinBlock);
 		}
 		else if( workDataSource.algorithm == ALGORITHM_RIECOIN )
@@ -460,6 +469,7 @@ void *xptMiner_minerThread(void *arg)
 
 uint8 algorithmInited[32] = {0};
 
+riecoinOptions_t riecoinOptions;
 /*
  * Reads data from the xpt connection state and writes it to the universal workDataSource struct
  */
@@ -535,7 +545,6 @@ xptClient_t* xptMiner_initateNewXptConnectionObject()
 	// the fee base is always calculated from 100% of the share value
 	// for example if you setup two fee entries with 3% and 2%, the total subtracted share value will be 5%
 	//xptClient_addDeveloperFeeEntry(xptClient, "Ptbi961RSBxRqNqWt4khoNDzZQExaVn7zL", getFeeFromDouble(0.5)); // 0.5% fee (jh00, for testing)
-	//xptClient_addDeveloperFeeEntry(xptClient, "RNh5PSLpPmkNxB3PgoLnKzpM75rmkzfz5y", getFeeFromDouble(2), false); // 0.5% fee (jh00, for testing)
 	return xptClient;
 }
 
@@ -547,7 +556,7 @@ void xptMiner_xptQueryWorkLoop()
 	if(minerSettings.requestTarget.donationPercent > 0.1f)
 	{
 		//xptClient_addDeveloperFeeEntry(xptClient, "MK6n2VZZBpQrqpP9rtzsC9PRi5t1qsWuGc", getFeeFromDouble(minerSettings.requestTarget.donationPercent / 2.0)); 
-		xptClient_addDeveloperFeeEntry(xptClient, "RNh5PSLpPmkNxB3PgoLnKzpM75rmkzfz5y", getFeeFromDouble(2), false); // 0.5% fee (jh00, for testing)
+		xptClient_addDeveloperFeeEntry(xptClient, "RNh5PSLpPmkNxB3PgoLnKzpM75rmkzfz5y", getFeeFromDouble(minerSettings.requestTarget.donationPercent), false); // 0.5% fee (jh00, for testing)
 	}
 	while( true )
 	{
@@ -657,12 +666,12 @@ void xptMiner_xptQueryWorkLoop()
 		{
 			// initiate new connection
 			EnterCriticalSection(&cs_xptClient);
+			xptClient_free(xptClient);
 			xptClient = xptMiner_initateNewXptConnectionObject();
-	uint32 timerPrintDetails = getTimeMilliseconds() + 8000;
 	if(minerSettings.requestTarget.donationPercent > 0.1f)
 	{
 		//xptClient_addDeveloperFeeEntry(xptClient, "MK6n2VZZBpQrqpP9rtzsC9PRi5t1qsWuGc", getFeeFromDouble(minerSettings.requestTarget.donationPercent / 2.0)); 
-		xptClient_addDeveloperFeeEntry(xptClient, "RNh5PSLpPmkNxB3PgoLnKzpM75rmkzfz5y", getFeeFromDouble(2), false); // 0.5% fee (jh00, for testing)
+		xptClient_addDeveloperFeeEntry(xptClient, "RNh5PSLpPmkNxB3PgoLnKzpM75rmkzfz5y", getFeeFromDouble(minerSettings.requestTarget.donationPercent), false); // 0.5% fee (jh00, for testing)
 	}
 			if( xptClient_connect(xptClient, &minerSettings.requestTarget) == false )
 			{
@@ -812,7 +821,6 @@ void xptMiner_parseCommandline(int argc, char **argv)
 		{
 			commandlineInput.useGPU = true;
 		}
-
 		else if( memcmp(argument, "-d", 3)==0 )
 		{
 			if( cIdx >= argc )
@@ -835,7 +843,7 @@ void xptMiner_parseCommandline(int argc, char **argv)
 		}
 		else
 		{
-			printf("'%s' is an unknown option.\nType jhPrimeminer.exe --help for more info\n", argument); 
+			printf("'%s' is an unknown option.\nType xptminer --help for more info\n", argument); 
 			exit(-1);
 		}
 	}
@@ -888,6 +896,10 @@ sysctl(mib, 2, &numcpu, &len, NULL, 0);
 
 	commandlineInput.numThreads = numcpu;
 	commandlineInput.numThreads = std::min(std::max(commandlineInput.numThreads, 1), 4);
+	riecoinOptions.ricPrimeTestsInitial = 500000;
+	riecoinOptions.ricPrimeTestsUpper = 64000;
+	riecoinOptions.ricStepMethod = true;
+	riecoinOptions.ricUpperSteps = 2;
 	xptMiner_parseCommandline(argc, argv);
 	minerSettings.protoshareMemoryMode = commandlineInput.ptsMemoryMode;
 	minerSettings.useGPU = commandlineInput.useGPU;
@@ -902,7 +914,7 @@ sysctl(mib, 2, &numcpu, &len, NULL, 0);
 	printf("Using %d CPU threads\n", commandlineInput.numThreads);
 	if( commandlineInput.useGPU )
 		printf("Using GPU if possible\n");
-	printf("Using %d threads\n", commandlineInput.numThreads);
+
 	
 	printf("\nFee Percentage:  %.2f%%. To set, use \"-d\" flag e.g. \"-d 2.5\" is 2.5%% donation\n\n", commandlineInput.donationPercent);
 #ifdef _WIN32

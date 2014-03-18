@@ -15,7 +15,6 @@ void metiscoin_process(minerMetiscoinBlock_t* block);
 void maxcoin_init();
 void maxcoin_process(minerMaxcoinBlock_t* block);
 void maxcoin_processGPU(minerMaxcoinBlock_t* block);
-void metiscoin_init_opencl(int device_num);
 // riecoin
 void riecoin_init();
 void riecoin_process(minerRiecoinBlock_t* block);

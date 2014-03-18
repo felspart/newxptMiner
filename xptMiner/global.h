@@ -1,13 +1,18 @@
+
+#ifndef __INCLUDE_GLOBAL_H__
+#define __INCLUDE_GLOBAL_H__
 #include <algorithm>
 #include <string.h>
 #include <cstring>
-#ifdef _WIN32
+
+
+
+#if defined(_WIN32) && !defined(__CYGWIN__)
 #define NOMINMAX
 #pragma comment(lib,"Ws2_32.lib")
-#include<Winsock2.h>
+#include<winsock2.h>
 #include<ws2tcpip.h>
 #include"mpir/mpir.h"
-
 typedef __int64           sint64;
 typedef unsigned __int64  uint64;
 typedef __int32           sint32;
@@ -26,41 +31,24 @@ typedef unsigned __int32 uint32_t;
 typedef __int64 int64_t;
 typedef unsigned __int64 uint64_t;
 
+#if defined(__MINGW32__)
+#define Sleep(x) usleep(x*1000)
+#include<unistd.h>
+#endif
+
+#elif defined(__CYGWIN__)
+#include"win.h" // port from windows
+#include"mpir/mpir.h"
 #else
+#include"win.h" // port from windows
+
+#ifndef USE_MPIR
 #include <gmpxx.h>
 #include <gmp.h>
-//#include"mpir/mpir.h"
-
-// Windows-isms for compatibility in Linux
-#define RtlZeroMemory(Destination,Length) std::memset((Destination),0,(Length))
-#define RtlCopyMemory(Destination,Source,Length) std::memcpy((Destination),(Source),(Length))
-
-#define _strdup(duration) strdup(duration)
-#define Sleep(ms) usleep(1000*ms)
-#define strcpy_s(dest,val,src) strncopy(dest,src,val)
-#define __debugbreak(); raise(SIGTRAP);
-#define CRITICAL_SECTION pthread_mutex_t
-#define EnterCriticalSection(Section) pthread_mutex_unlock(Section)
-#define LeaveCriticalSection(Section) pthread_mutex_unlock(Section)
-#define InitializeCriticalSection(Section) pthread_mutex_init(Section, NULL)
-
-// lazy workaround
-typedef int SOCKET;
-typedef struct sockaddr_in SOCKADDR_IN;
-typedef struct sockaddr SOCKADDR;
-#define SOCKET_ERROR -1
-#define closesocket close
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/select.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <sys/fcntl.h>
-#include <unistd.h>
-#include <signal.h>
-#include <pthread.h>
-
+#else
+#include <mpirxx.h>
+#include <mpir.h>
+#endif
 #endif
 
 #ifndef thread_local
@@ -81,6 +69,14 @@ typedef struct sockaddr SOCKADDR;
 #  error "Cannot define thread_local"
 # endif
 #endif
+#if defined(_MSC_VER)
+#define _ALIGNED(x) __declspec(align(x))
+#else
+#if defined(__GNUC__)
+#define _ALIGNED(x) __attribute__ ((aligned(x)))
+#endif
+#endif
+#define _ALIGNED_TYPE(t,x) typedef t _ALIGNED(x)
 
 #include<stdio.h>
 #include<time.h>
@@ -245,6 +241,14 @@ typedef struct
 	uint32  shareTargetCompact;
 }minerRiecoinBlock_t;
 
+typedef struct
+{
+	uint32 ricPrimeTestsInitial;
+	uint32 ricPrimeTestsUpper;
+	uint32 ricUpperSteps;
+	bool ricStepMethod;
+}riecoinOptions_t;
+
 #include"scrypt.h"
 #include"algorithm.h"
 #include"openCL.h"
@@ -267,3 +271,5 @@ extern volatile uint32 total4ChainCount;
 
 extern volatile uint32 monitorCurrentBlockHeight;
 extern volatile uint32 monitorCurrentBlockTime;
+
+#endif
